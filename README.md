@@ -3,7 +3,7 @@ A test between a few of the popular libraries running a speed test on how fast t
 
 ## Benchmark Description
 
-There are two benchmarks:
+There are two benchmarks:  
 Simple model. Writes and reads 10000 times:
 ```java
 public class SimpleAddressItem{
