@@ -28,15 +28,20 @@ public class AddressBook implements IAddressBook<AddressItem, Contact> {
 
     @ForeignCollectionField
     private ForeignCollection<AddressItem> addresses;
-    private Collection<AddressItem> nonDaoAddresses;
+    public Collection<AddressItem> nonDaoAddresses;
 
     @ForeignCollectionField
     private ForeignCollection<Contact> contacts;
-    private Collection<Contact> nonDaoContacts;
+    public Collection<Contact> nonDaoContacts;
 
     @Override
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override
@@ -60,11 +65,11 @@ public class AddressBook implements IAddressBook<AddressItem, Contact> {
         if (this.nonDaoAddresses == null) {
             return;
         }
-        addressBookDao.assignEmptyForeignCollection(this, "addresses");
+//        addressBookDao.assignEmptyForeignCollection(this, "addresses");
         for (AddressItem addressItem : nonDaoAddresses) {
-            addressItem.setAddressBook(this);
+//            addressItem.setAddressBook(this);
             addressItemDao.create(addressItem);
-            addresses.add(addressItem);
+//            addresses.add(addressItem);
         }
     }
 
@@ -94,11 +99,11 @@ public class AddressBook implements IAddressBook<AddressItem, Contact> {
         if (this.nonDaoContacts == null) {
             return;
         }
-        addressBookDao.assignEmptyForeignCollection(this, "contacts");
+//        addressBookDao.assignEmptyForeignCollection(this, "contacts");
         for (Contact contact : nonDaoContacts) {
-            contact.setAddressBook(this);
+//            contact.setAddressBook(this);
             contactDao.create(contact);
-            contacts.add(contact);
+//            contacts.add(contact);
         }
     }
 

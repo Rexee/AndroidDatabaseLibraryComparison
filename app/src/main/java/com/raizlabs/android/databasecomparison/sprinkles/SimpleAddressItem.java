@@ -64,7 +64,23 @@ public class SimpleAddressItem extends Model implements IAddressItem<AddressBook
     }
 
     @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public long getPhone() {
+        return phone;
+    }
+
+    @Override
+    public String getAddress() {
+        return address;
+    }
+
+    @Override
     public void saveAll() {
         super.save();
     }
+
 }

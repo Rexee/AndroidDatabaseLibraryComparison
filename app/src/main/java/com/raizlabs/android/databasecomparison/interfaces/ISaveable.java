@@ -5,5 +5,6 @@ package com.raizlabs.android.databasecomparison.interfaces;
  */
 public interface ISaveable {
 
-    public void saveAll();
+    void saveAll();
+
 }

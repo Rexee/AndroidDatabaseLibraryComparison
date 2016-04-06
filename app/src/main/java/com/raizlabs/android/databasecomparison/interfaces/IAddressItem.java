@@ -5,15 +5,19 @@ package com.raizlabs.android.databasecomparison.interfaces;
  */
 public interface IAddressItem<AddressBook extends IAddressBook> extends ISaveable {
 
-    public void setName(String name);
+    void setName(String name);
 
-    public void setAddress(String address);
+    void setAddress(String address);
 
-    public void setCity(String city);
+    void setCity(String city);
 
-    public void setState(String state);
+    void setState(String state);
 
-    public void setPhone(long phone);
+    void setPhone(long phone);
 
-    public void setAddressBook(AddressBook addressBook);
+    void setAddressBook(AddressBook addressBook);
+
+    String getName();
+    long getPhone();
+    String getAddress();
 }

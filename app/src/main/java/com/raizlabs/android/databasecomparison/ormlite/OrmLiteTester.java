@@ -7,7 +7,7 @@ import android.util.Log;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
 import com.raizlabs.android.databasecomparison.Generator;
-import com.raizlabs.android.databasecomparison.Loader;
+import com.raizlabs.android.databasecomparison.Verificator;
 import com.raizlabs.android.databasecomparison.MainActivity;
 import com.raizlabs.android.databasecomparison.events.LogTestDataEvent;
 
@@ -20,8 +20,7 @@ import de.greenrobot.event.EventBus;
  * Runs benchmarks for OrmLite
  */
 public class OrmLiteTester {
-    public static final String FRAMEWORK_NAME = "OrmLite";
-    private static final String TAG = OrmLiteTester.class.getName();
+    public static final  String FRAMEWORK_NAME = "OrmLite";
 
     public static void testAddressBooks(Context context) {
         DatabaseHelper dbHelper = OpenHelperManager.getHelper(context, DatabaseHelper.class);
@@ -31,13 +30,10 @@ public class OrmLiteTester {
             dbHelper.getAddressItemDao().deleteBuilder().delete();
             dbHelper.getContactDao().deleteBuilder().delete();
         } catch (SQLException e) {
-            Log.e(TAG, "Error clearing DB", e);
+            Log.e(FRAMEWORK_NAME, "Error clearing DB", e);
         }
 
-        Collection<AddressBook> addressBooks = Generator.createAddressBooks(
-                AddressBook.class,
-                Contact.class, AddressItem.class,
-                MainActivity.ADDRESS_BOOK_COUNT);
+        final Collection<AddressBook> addressBooks = Generator.createAddressBooks(AddressBook.class, Contact.class, AddressItem.class, MainActivity.COMPLEX_LOOP_COUNT, true);
         long startTime = System.currentTimeMillis();
 
         try {
@@ -60,19 +56,10 @@ public class OrmLiteTester {
             } finally {
                 db.endTransaction();
             }
-            EventBus.getDefault().post(new LogTestDataEvent(startTime, FRAMEWORK_NAME, MainActivity.SAVE_TIME));
+            EventBus.getDefault().post(new LogTestDataEvent(startTime, System.currentTimeMillis(), FRAMEWORK_NAME, MainActivity.SAVE_TIME));
 
-            startTime = System.currentTimeMillis();
-            addressBooks = addressBookDao.queryForAll();
-            Loader.loadAllInnerData(addressBooks);
-            EventBus.getDefault().post(new LogTestDataEvent(startTime, FRAMEWORK_NAME, MainActivity.LOAD_TIME));
-
-            // clean out DB for next run
-            contactDao.deleteBuilder().delete();
-            addressItemDao.deleteBuilder().delete();
-            addressBookDao.deleteBuilder().delete();
         } catch (SQLException e) {
-            Log.e(TAG, "Error clearing DB", e);
+            Log.e(FRAMEWORK_NAME, "Error clearing DB", e);
         }
 
         OpenHelperManager.releaseHelper();
@@ -84,10 +71,10 @@ public class OrmLiteTester {
         try {
             dbHelper.getSimpleAddressItemDao().deleteBuilder().delete();
         } catch (SQLException e) {
-            Log.e(TAG, "Error clearing DB", e);
+            Log.e(FRAMEWORK_NAME, "Error clearing DB", e);
         }
 
-        Collection<SimpleAddressItem> simpleAddressItems = Generator.getAddresses(SimpleAddressItem.class, MainActivity.LOOP_COUNT);
+        Collection<SimpleAddressItem> simpleAddressItems = Generator.getAddresses(SimpleAddressItem.class, MainActivity.SIMPLE_LOOP_COUNT);
         long startTime = System.currentTimeMillis();
 
         try {
@@ -104,16 +91,42 @@ public class OrmLiteTester {
             } finally {
                 db.endTransaction();
             }
-            EventBus.getDefault().post(new LogTestDataEvent(startTime, FRAMEWORK_NAME, MainActivity.SAVE_TIME));
+            EventBus.getDefault().post(new LogTestDataEvent(startTime, System.currentTimeMillis(), FRAMEWORK_NAME, MainActivity.SAVE_TIME));
 
-            startTime = System.currentTimeMillis();
-            simpleAddressItems = simpleItemDao.queryForAll();
-            EventBus.getDefault().post(new LogTestDataEvent(startTime, FRAMEWORK_NAME, MainActivity.LOAD_TIME));
-
-            // clean out DB for next run
-            simpleItemDao.deleteBuilder().delete();
         } catch (SQLException e) {
-            Log.e(TAG, "Error clearing DB", e);
+            Log.e(FRAMEWORK_NAME, "Error clearing DB", e);
+        }
+
+        OpenHelperManager.releaseHelper();
+    }
+
+    public static void testAddressBooksRead(Context context) {
+        DatabaseHelper dbHelper = OpenHelperManager.getHelper(context, DatabaseHelper.class);
+
+        try {
+            Dao<AddressBook, Integer> addressBookDao = dbHelper.getAddressBookDao();
+            long startTime = System.currentTimeMillis();
+            Collection<AddressBook> addressBooks = addressBookDao.queryForAll();
+            Verificator.verify(FRAMEWORK_NAME, addressBooks);
+            EventBus.getDefault().post(new LogTestDataEvent(startTime, System.currentTimeMillis(), FRAMEWORK_NAME, MainActivity.LOAD_TIME));
+        } catch (SQLException e) {
+            Log.e(FRAMEWORK_NAME, "Error clearing DB", e);
+        }
+
+        OpenHelperManager.releaseHelper();
+    }
+
+    public static void testAddressItemsRead(Context context) {
+        DatabaseHelper dbHelper = OpenHelperManager.getHelper(context, DatabaseHelper.class);
+
+        try {
+            Dao<SimpleAddressItem, Integer> simpleItemDao = dbHelper.getSimpleAddressItemDao();
+            long startTime = System.currentTimeMillis();
+            Collection<SimpleAddressItem> simpleAddressItems = simpleItemDao.queryForAll();
+            Verificator.verifySimple(FRAMEWORK_NAME, simpleAddressItems);
+            EventBus.getDefault().post(new LogTestDataEvent(startTime, System.currentTimeMillis(), FRAMEWORK_NAME, MainActivity.LOAD_TIME));
+        } catch (SQLException e) {
+            Log.e(FRAMEWORK_NAME, "Error clearing DB", e);
         }
 
         OpenHelperManager.releaseHelper();

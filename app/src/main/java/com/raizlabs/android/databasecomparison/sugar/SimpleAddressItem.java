@@ -6,8 +6,7 @@ import com.raizlabs.android.databasecomparison.interfaces.IAddressItem;
 /**
  * Description:
  */
-public class SimpleAddressItem extends SugarRecord<SimpleAddressItem> implements IAddressItem<AddressBook> {
-
+public class SimpleAddressItem extends SugarRecord implements IAddressItem<AddressBook> {
 
     private String name;
 
@@ -49,7 +48,23 @@ public class SimpleAddressItem extends SugarRecord<SimpleAddressItem> implements
     }
 
     @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
     public void saveAll() {
         super.save();
+    }
+
+
+    @Override
+    public long getPhone() {
+        return phone;
+    }
+
+    @Override
+    public String getAddress() {
+        return address;
     }
 }

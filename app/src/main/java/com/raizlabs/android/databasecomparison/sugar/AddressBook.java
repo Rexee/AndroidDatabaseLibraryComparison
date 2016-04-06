@@ -1,6 +1,5 @@
 package com.raizlabs.android.databasecomparison.sugar;
 
-import com.orm.StringUtil;
 import com.orm.SugarRecord;
 import com.orm.dsl.Ignore;
 import com.raizlabs.android.databasecomparison.interfaces.IAddressBook;
@@ -10,7 +9,7 @@ import java.util.Collection;
 /**
  * Description:
  */
-public class AddressBook extends SugarRecord<AddressBook> implements IAddressBook<AddressItem, Contact> {
+public class AddressBook extends SugarRecord implements IAddressBook<AddressItem, Contact> {
 
     private String name;
 
@@ -28,6 +27,11 @@ public class AddressBook extends SugarRecord<AddressBook> implements IAddressBoo
     }
 
     @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
     public void setAuthor(String author) {
         this.author = author;
     }
@@ -40,8 +44,7 @@ public class AddressBook extends SugarRecord<AddressBook> implements IAddressBoo
     @Override
     public Collection<AddressItem> getAddresses() {
         if(addresses == null) {
-            addresses = AddressItem.find(AddressItem.class, StringUtil.toSQLName("addressBook") + "= ?",
-                    String.valueOf(id));
+            addresses = AddressItem.find(AddressItem.class, "ADDRESS_BOOK = ?", String.valueOf(getId()));
         }
         return addresses;
     }
@@ -49,8 +52,7 @@ public class AddressBook extends SugarRecord<AddressBook> implements IAddressBoo
     @Override
     public Collection<Contact> getContacts() {
         if(contacts == null) {
-            contacts = Contact.find(Contact.class, StringUtil.toSQLName("addressBook") + " = ?",
-                    String.valueOf(id));
+            contacts = Contact.find(Contact.class, "ADDRESS_BOOK = ?", String.valueOf(getId()));
         }
         return contacts;
     }

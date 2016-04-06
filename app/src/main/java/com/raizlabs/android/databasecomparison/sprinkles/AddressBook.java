@@ -6,6 +6,7 @@ import java.util.Collection;
 
 import se.emilsjolander.sprinkles.Model;
 import se.emilsjolander.sprinkles.Query;
+import se.emilsjolander.sprinkles.Transaction;
 import se.emilsjolander.sprinkles.annotations.AutoIncrement;
 import se.emilsjolander.sprinkles.annotations.Column;
 import se.emilsjolander.sprinkles.annotations.Key;
@@ -15,7 +16,7 @@ import se.emilsjolander.sprinkles.annotations.Table;
  * Description:
  */
 @Table("AddressBook")
-public class AddressBook extends Model implements IAddressBook<SimpleAddressItem, Contact>{
+public class AddressBook extends Model implements IAddressBook<AddressItem, Contact>{
 
     @Column("id")
     @AutoIncrement
@@ -28,7 +29,7 @@ public class AddressBook extends Model implements IAddressBook<SimpleAddressItem
     @Column("author")
     private String author;
 
-    Collection<SimpleAddressItem> addresses;
+    Collection<AddressItem> addresses;
 
     Collection<Contact> contacts;
 
@@ -38,20 +39,24 @@ public class AddressBook extends Model implements IAddressBook<SimpleAddressItem
     }
 
     @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
     public void setAuthor(String author) {
         this.author = author;
     }
 
     @Override
-    public void setAddresses(Collection<SimpleAddressItem> addresses) {
+    public void setAddresses(Collection<AddressItem> addresses) {
         this.addresses = addresses;
     }
 
     @Override
-    public Collection<SimpleAddressItem> getAddresses() {
+    public Collection<AddressItem> getAddresses() {
         if (addresses == null) {
-            addresses = Query.many(SimpleAddressItem.class, "addressBook = ?",
-                    String.valueOf(id)).get().asList();
+            addresses = Query.many(AddressItem.class, "select * from AddressItem where addressBook=?", String.valueOf(id)).get().asList();
         }
         return addresses;
     }
@@ -59,8 +64,7 @@ public class AddressBook extends Model implements IAddressBook<SimpleAddressItem
     @Override
     public Collection<Contact> getContacts() {
         if (contacts == null) {
-            contacts = Query.many(Contact.class, "addressBook = ?",
-                    String.valueOf(id)).get().asList();
+            contacts = Query.many(Contact.class, "select * from Contact where addressBook=?", String.valueOf(id)).get().asList();
         }
         return contacts;
     }
@@ -76,12 +80,18 @@ public class AddressBook extends Model implements IAddressBook<SimpleAddressItem
 
     @Override
     public void saveAll() {
-        super.save();
-        for (SimpleAddressItem addressItem : addresses) {
-            addressItem.saveAll();
+
+    }
+
+    public void saveAll(Transaction transaction) {
+        super.save(transaction);
+        for (AddressItem addressItem : addresses) {
+            addressItem.setAddressBook(this);
+            addressItem.save(transaction);
         }
         for (Contact contact : contacts) {
-            contact.saveAll();
+            contact.setAddressBook(this);
+            contact.save(transaction);
         }
     }
 }

@@ -51,7 +51,7 @@ public class Contact extends Model implements IContact<AddressBook>{
 
     @Override
     public AddressBook getAddressBookField() {
-        return Query.one(AddressBook.class, "id = ?" , addressBook_id).get();
+        return Query.one(AddressBook.class, "select * from AddressBook where id = ? limit 1" , addressBook_id).get();
     }
 
     @Override

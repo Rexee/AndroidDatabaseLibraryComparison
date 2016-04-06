@@ -60,7 +60,22 @@ public class SimpleAddressItem implements IAddressItem<AddressBook> {
     }
 
     @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
     public void saveAll() {
 
+    }
+
+    @Override
+    public long getPhone() {
+        return phone;
+    }
+
+    @Override
+    public String getAddress() {
+        return address;
     }
 }

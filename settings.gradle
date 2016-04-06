@@ -1,2 +1,3 @@
-include ':app', ':greendaogenerator', ':ormlitegenerator'
+include ':app', ':greendaogenerator', ':ormlitegenerator', ':sugar'
 include ':Libraries:DBFlow:library', ':Libraries:DBFlow:flowcore',':Libraries:DBFlow:compiler'
+project(':sugar').projectDir = new File('Libraries/sugar/library')

@@ -7,15 +7,17 @@ import java.util.Collection;
  */
 public interface IAddressBook<AddressItem extends IAddressItem, Contact extends IContact> extends ISaveable {
 
-    public void setName(String name);
+    void setName(String name);
 
-    public void setAuthor(String author);
+    String getName();
 
-    public void setAddresses(Collection<AddressItem> addresses);
+    void setAuthor(String author);
 
-    public Collection<AddressItem> getAddresses();
+    void setAddresses(Collection<AddressItem> addresses);
 
-    public Collection<Contact> getContacts();
+    Collection<AddressItem> getAddresses();
 
-    public void setContacts(Collection<Contact> contacts);
+    Collection<Contact> getContacts();
+
+    void setContacts(Collection<Contact> contacts);
 }

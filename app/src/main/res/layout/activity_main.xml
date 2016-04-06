@@ -36,6 +36,33 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/simpleread"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="runSimpleTrialRead"
+            android:text="@string/simpleread"/>
+
+        <Button
+            android:id="@+id/complexread"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="runComplexTrialRead"
+            android:text="@string/complexread"/>
+
+        <ProgressBar
+            android:id="@+id/progressread"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
     <TextView
         android:id="@+id/resultsLabel"
         android:layout_width="match_parent"

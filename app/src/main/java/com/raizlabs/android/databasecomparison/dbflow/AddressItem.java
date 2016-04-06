@@ -3,23 +3,21 @@ package com.raizlabs.android.databasecomparison.dbflow;
 import com.raizlabs.android.databasecomparison.interfaces.IAddressItem;
 import com.raizlabs.android.dbflow.annotation.Column;
 import com.raizlabs.android.dbflow.annotation.ForeignKey;
-import com.raizlabs.android.dbflow.annotation.ForeignKeyReference;
 import com.raizlabs.android.dbflow.annotation.PrimaryKey;
 import com.raizlabs.android.dbflow.annotation.Table;
+import com.raizlabs.android.dbflow.config.FlowManager;
 import com.raizlabs.android.dbflow.structure.BaseModel;
 import com.raizlabs.android.dbflow.structure.container.ForeignKeyContainer;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * Description:
  */
-@Table(databaseName = DBFlowDatabase.NAME)
+@Table(database = DBFlowDatabase.class)//3.x
+//@Table(databaseName = DBFlowDatabase.NAME)//2.x
 public class AddressItem extends BaseModel implements IAddressItem<AddressBook> {
 
+    //    @Column
     @PrimaryKey(autoincrement = true)
-    @Column
     long id;
 
     @Column(name = "name")
@@ -68,18 +66,42 @@ public class AddressItem extends BaseModel implements IAddressItem<AddressBook> 
         super.insert();
     }
 
-    @ForeignKey(
-            references = {@ForeignKeyReference(columnName = "addressBook", columnType = long.class, foreignColumnName = "id")},
-            saveForeignKeyModel = false)
-    @Column
+    //3.x
+    @ForeignKey(saveForeignKeyModel = false)
     ForeignKeyContainer<AddressBook> addressBook;
+
+    //2.x
+//    @ForeignKey(
+//            references = {@ForeignKeyReference(columnName = "addressBook", columnType = Long.class, foreignColumnName = "id")},
+//            saveForeignKeyModel = false)
+//    @Column
+//    ForeignKeyContainer<AddressBook> addressBook;
 
 
     @Override
     public void setAddressBook(AddressBook addressBook) {
-        this.addressBook = new ForeignKeyContainer<>(AddressBook.class);
-        Map<String, Object> keys = new LinkedHashMap<>();
-        keys.put(AddressBook$Table.ID, addressBook.id);
-        this.addressBook.setData(keys);
+        //3.x
+        this.addressBook = FlowManager.getContainerAdapter(AddressBook.class).toForeignKeyContainer(addressBook);
+
+        //2.x
+//        this.addressBook = new ForeignKeyContainer<>(AddressBook.class);
+//        Map<String, Object> keys = new LinkedHashMap<>();
+//        keys.put(AddressBook$Table.ID, addressBook.id);
+//        this.addressBook.setData(keys);
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public long getPhone() {
+        return phone;
+    }
+
+    @Override
+    public String getAddress() {
+        return address;
     }
 }

@@ -6,13 +6,13 @@ import com.raizlabs.android.databasecomparison.interfaces.IContact;
 /**
  * Description:
  */
-public class Contact extends SugarRecord<Contact> implements IContact<AddressBook> {
+public class Contact extends SugarRecord implements IContact<AddressBook> {
 
     private String name;
 
     private String email;
 
-    private AddressBook addressBook;
+    public AddressBook addressBook;
 
     @Override
     public String getName() {

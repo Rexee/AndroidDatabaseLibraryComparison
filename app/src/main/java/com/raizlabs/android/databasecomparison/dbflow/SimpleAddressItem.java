@@ -1,17 +1,22 @@
 package com.raizlabs.android.databasecomparison.dbflow;
 
-import com.raizlabs.android.databasecomparison.interfaces.IAddressItem;
 import com.raizlabs.android.databasecomparison.MainActivity;
+import com.raizlabs.android.databasecomparison.interfaces.IAddressItem;
 import com.raizlabs.android.dbflow.annotation.Column;
 import com.raizlabs.android.dbflow.annotation.PrimaryKey;
 import com.raizlabs.android.dbflow.annotation.Table;
-import com.raizlabs.android.dbflow.structure.cache.BaseCacheableModel;
+import com.raizlabs.android.dbflow.structure.BaseModel;
 
 /**
  * Description:
  */
-@Table(databaseName = DBFlowDatabase.NAME)
-public class SimpleAddressItem extends BaseCacheableModel implements IAddressItem<AddressBook> {
+//3.x
+@Table(database = DBFlowDatabase.class, cachingEnabled = true, cacheSize = MainActivity.COMPLEX_LOOP_COUNT)
+public class SimpleAddressItem extends BaseModel implements IAddressItem<AddressBook> {
+
+//2.x
+//@Table(databaseName = DBFlowDatabase.NAME)
+//public class SimpleAddressItem extends BaseCacheableModel implements IAddressItem<AddressBook> {
 
     @PrimaryKey(autoincrement = true)
     @Column
@@ -63,12 +68,28 @@ public class SimpleAddressItem extends BaseCacheableModel implements IAddressIte
     }
 
     @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
     public void saveAll() {
         super.insert();
     }
 
+//2.x
+//    @Override
+//    public int getCacheSize() {
+//        return MainActivity.SIMPLE_LOOP_COUNT;
+//    }
+
     @Override
-    public int getCacheSize() {
-        return MainActivity.LOOP_COUNT;
+    public long getPhone() {
+        return phone;
+    }
+
+    @Override
+    public String getAddress() {
+        return address;
     }
 }

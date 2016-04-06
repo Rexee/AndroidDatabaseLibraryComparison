@@ -31,6 +31,11 @@ public class AddressBook extends Model implements IAddressBook<AddressItem, Cont
     }
 
     @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
     public void setAuthor(String author) {
         this.author = author;
     }

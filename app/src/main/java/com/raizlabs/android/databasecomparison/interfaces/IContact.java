@@ -5,15 +5,15 @@ package com.raizlabs.android.databasecomparison.interfaces;
  */
 public interface IContact<AddressBook extends IAddressBook> extends ISaveable {
 
-    public String getName();
+    String getName();
 
-    public void setName(String name);
+    void setName(String name);
 
-    public String getEmail();
+    String getEmail();
 
-    public void setEmail(String email);
+    void setEmail(String email);
 
-    public AddressBook getAddressBookField();
+    AddressBook getAddressBookField();
 
-    public void setAddressBook(AddressBook addressBook);
+    void setAddressBook(AddressBook addressBook);
 }

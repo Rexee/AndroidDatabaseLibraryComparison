@@ -15,17 +15,21 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.raizlabs.android.databasecomparison.activeandroid.AATester;
+import com.raizlabs.android.databasecomparison.cupboard.CupboardTester;
 import com.raizlabs.android.databasecomparison.dbflow.DBFlowTester;
 import com.raizlabs.android.databasecomparison.events.LogTestDataEvent;
 import com.raizlabs.android.databasecomparison.events.TrialCompletedEvent;
 import com.raizlabs.android.databasecomparison.greendao.GreenDaoTester;
 import com.raizlabs.android.databasecomparison.ollie.OllieTester;
 import com.raizlabs.android.databasecomparison.ormlite.OrmLiteTester;
+import com.raizlabs.android.databasecomparison.realm.RealmTester;
 import com.raizlabs.android.databasecomparison.sprinkles.SprinklesTester;
+import com.raizlabs.android.databasecomparison.sql.SqlTester;
 import com.raizlabs.android.databasecomparison.sugar.SugarTester;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import de.greenrobot.event.EventBus;
 
@@ -34,16 +38,17 @@ public class MainActivity extends Activity {
     public static final String LOAD_TIME = "Load";
     public static final String SAVE_TIME = "Save";
 
-    public static final int LOOP_COUNT = 25000;
+    public static final int SIMPLE_LOOP_COUNT  = 10000;
+    public static final int COMPLEX_LOOP_COUNT = 50;
 
-    public static final int ADDRESS_BOOK_COUNT = 50;
-
-    private static final String STATE_MAPDATA = "mapData";
+    private static final String STATE_MAPDATA       = "mapData";
     private static final String STATE_RUNNING_TESTS = "runningTests";
-    private static final String STATE_TEST_NAME = "testName";
+    private static final String STATE_TEST_NAME     = "testName";
 
-    private Button simpleTrialButton;
-    private Button complexTrialButton;
+    private Button   simpleTrialButton;
+    private Button   complexTrialButton;
+    private Button   complexTrialButtonRead;
+    private Button   simpleTrialButtonRead;
     private TextView resultsLabel;
     private TextView resultsTextView;
     private static StringBuilder resultsStringBuilder = new StringBuilder();
@@ -51,9 +56,11 @@ public class MainActivity extends Activity {
 
     private BarChart chartView;
     private LinkedHashMap<String, ArrayList<BarEntry>> chartEntrySets = new LinkedHashMap<>();
-    private boolean runningTests = false;
+    private boolean                                    runningTests   = false;
     private String runningTestName;
     private Thread runTestThread;
+
+    private List<String> results;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +69,8 @@ public class MainActivity extends Activity {
 
         simpleTrialButton = (Button) findViewById(R.id.simple);
         complexTrialButton = (Button) findViewById(R.id.complex);
+        simpleTrialButtonRead = (Button) findViewById(R.id.simpleread);
+        complexTrialButtonRead = (Button) findViewById(R.id.complexread);
         resultsLabel = (TextView) findViewById(R.id.resultsLabel);
         resultsTextView = (TextView) findViewById(R.id.results);
         progressBar = (ProgressBar) findViewById(R.id.progress);
@@ -105,37 +114,42 @@ public class MainActivity extends Activity {
 
     // handle data collection event
     public void onEvent(LogTestDataEvent event) {
-        logTime(event.getStartTime(), event.getFramework(), event.getEventName());
+        logTime(event.getStartTime(), event.getEndTime(), event.getFramework(), event.getEventName());
     }
 
     // handle graphing event
-    public void onEventMainThread(TrialCompletedEvent event){
-        initChart();
-        runningTests = false;
+    public void onEventMainThread(TrialCompletedEvent event) {
+        progressBar.setVisibility(View.GONE);
+//        initChart();
+        String resultStr = "";
+        for (String strRes : results) {
+            resultStr += strRes + ";";
+        }
+        Log.e("Results", resultStr);
         setBusyUI(false, event.getTrialName());
     }
 
     /**
      * Logs msec between start time and now
+     *
      * @param startTime relative to start time in msec; use -1 to set elapsed time to zero
+     * @param endTime
      * @param framework framework logging event
-     * @param name string to log for event
+     * @param name      string to log for event
      */
-    public void logTime(long startTime, String framework, String name) {
-        Log.e(MainActivity.class.getSimpleName(), name + " took: " + (System.currentTimeMillis() - startTime));
-        long elapsedMsec = (startTime == -1) ? 0 : System.currentTimeMillis() - startTime;
-        resultsStringBuilder.append(framework).append(' ').append(name)
-                .append(" took: ")
-                .append(elapsedMsec)
-                .append(" msec\n");
+    public void logTime(long startTime, long endTime, String framework, String name) {
+        long elapsedMsec = (startTime == -1) ? 0 : endTime - startTime;
+        Log.e(MainActivity.class.getSimpleName(), framework + ". " + name + " took: " + elapsedMsec);
+        resultsStringBuilder.append(framework).append(' ').append(name).append(" took: ").append(elapsedMsec).append(" msec\n");
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 resultsTextView.setText(resultsStringBuilder.toString());
             }
         });
+        results.add(String.valueOf(elapsedMsec));
         // update chart data
-        addChartData(framework, name, elapsedMsec);
+//        addChartData(framework, name, elapsedMsec);
     }
 
     private void setBusyUI(boolean enabled, String testName) {
@@ -149,17 +163,17 @@ public class MainActivity extends Activity {
             progressBar.setVisibility(View.VISIBLE);
         } else {
             runningTests = false;
-            resultsTextView.setVisibility(View.GONE);
-            if (runningTestName != null) {
-                chartView.setVisibility(View.VISIBLE);
-            }
+//            resultsTextView.setVisibility(View.GONE);
+//            if (runningTestName != null) {
+//                chartView.setVisibility(View.VISIBLE);
+//            }
             enableButtons(true);
             progressBar.setVisibility(View.GONE);
         }
-        if (runningTestName != null) {
-            resultsLabel.setText(getResources().getString(R.string.results, testName));
-            resultsLabel.setVisibility(View.VISIBLE);
-        }
+//        if (runningTestName != null) {
+//            resultsLabel.setText(getResources().getString(R.string.results, testName));
+//            resultsLabel.setVisibility(View.VISIBLE);
+//        }
     }
 
     private void initChart() {
@@ -178,25 +192,31 @@ public class MainActivity extends Activity {
         BarData data = new BarData(xAxisLabels, dataSets);
         chartView.setData(data);
         chartView.setDescription(null); // this takes up too much space, so clear it
-        chartView.animateXY(2000, 2000);
+        chartView.animateXY(200, 200);
         chartView.invalidate();
     }
-    private void resetChart() {
+
+    private void reset(int resId) {
+        setBusyUI(true, getResources().getString(resId));
+
+        results = new ArrayList<>();
+
         chartEntrySets.clear();
         // the order you add these in is the order they're displayed in
         chartEntrySets.put(DBFlowTester.FRAMEWORK_NAME, new ArrayList<BarEntry>());
         chartEntrySets.put(GreenDaoTester.FRAMEWORK_NAME, new ArrayList<BarEntry>());
         chartEntrySets.put(OrmLiteTester.FRAMEWORK_NAME, new ArrayList<BarEntry>());
-        chartEntrySets.put(SugarTester.FRAMEWORK_NAME, new ArrayList<BarEntry>());
+        chartEntrySets.put(RealmTester.FRAMEWORK_NAME, new ArrayList<BarEntry>());
         chartEntrySets.put(AATester.FRAMEWORK_NAME, new ArrayList<BarEntry>());
         chartEntrySets.put(OllieTester.FRAMEWORK_NAME, new ArrayList<BarEntry>());
         chartEntrySets.put(SprinklesTester.FRAMEWORK_NAME, new ArrayList<BarEntry>());
     }
+
     private int getFrameworkColor(String framework) {
         // using the 300 line colors from http://www.google.com/design/spec/style/color.html#color-color-palette
         switch (framework) {
             case DBFlowTester.FRAMEWORK_NAME:
-                return Color.rgb(0xE5,0x73,0x73); // red
+                return Color.rgb(0xE5, 0x73, 0x73); // red
             case AATester.FRAMEWORK_NAME:
                 return Color.rgb(0xF0, 0x62, 0x92); // pink
             case OllieTester.FRAMEWORK_NAME:
@@ -207,12 +227,13 @@ public class MainActivity extends Activity {
                 return Color.rgb(0x4D, 0xB6, 0xAC); // teal
             case SprinklesTester.FRAMEWORK_NAME:
                 return Color.rgb(0x79, 0x86, 0xCB); // indigo
-            case SugarTester.FRAMEWORK_NAME:
+            case RealmTester.FRAMEWORK_NAME:
                 return Color.rgb(0x64, 0xB5, 0XF6); // blue
             default:
                 return Color.WHITE;
         }
     }
+
     private void addChartData(String framework, String category, long value) {
         BarEntry entry = new BarEntry(value, category.equals(SAVE_TIME) ? 0 : 1);
         chartEntrySets.get(framework).add(entry);
@@ -221,54 +242,113 @@ public class MainActivity extends Activity {
     private void enableButtons(boolean enabled) {
         simpleTrialButton.setEnabled(enabled);
         complexTrialButton.setEnabled(enabled);
+        simpleTrialButtonRead.setEnabled(enabled);
+        complexTrialButtonRead.setEnabled(enabled);
     }
 
     /**
      * runs simple benchmarks (onClick from R.id.simple)
+     *
      * @param v button view
      */
+
     public void runSimpleTrial(View v) {
-        setBusyUI(true, getResources().getString(R.string.simple));
-        resetChart();
+        reset(R.string.simple);
         runTestThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 runningTests = true;
                 Context applicationContext = MainActivity.this.getApplicationContext();
+                RealmTester.testAddressItems();
                 OrmLiteTester.testAddressItems(applicationContext);
                 GreenDaoTester.testAddressItems(applicationContext);
-                DBFlowTester.testAddressItems(applicationContext);
+                DBFlowTester.testAddressItems();
+                CupboardTester.testAddressItems(applicationContext);
+                SqlTester.testAddressItems(applicationContext);
                 SprinklesTester.testAddressItems(applicationContext);
-                AATester.testAddressItems(applicationContext);
-                OllieTester.testAddressItems(applicationContext);
-                SugarTester.testAddressItems(applicationContext);
+                AATester.testAddressItems();
+                OllieTester.testAddressItems();
+                SugarTester.testAddressItems();
                 EventBus.getDefault().post(new TrialCompletedEvent(getResources().getString(R.string.simple)));
             }
         });
         runTestThread.start();
+        System.gc();
     }
 
     /**
      * runs complex benchmarks (onClick from R.id.complex)
+     *
      * @param v button view
      */
     public void runComplexTrial(View v) {
-        setBusyUI(true, getResources().getString(R.string.complex));
-        resetChart();
+        reset(R.string.complex);
         new Thread(new Runnable() {
             @Override
             public void run() {
                 runningTests = true;
                 Context applicationContext = MainActivity.this.getApplicationContext();
+                RealmTester.testAddressBooks();
                 OrmLiteTester.testAddressBooks(applicationContext);
                 GreenDaoTester.testAddressBooks(applicationContext);
-                DBFlowTester.testAddressBooks(applicationContext);
+                DBFlowTester.testAddressBooks();
+                CupboardTester.testAddressBooks(applicationContext);
+                SqlTester.testAddressBooks(applicationContext);
                 SprinklesTester.testAddressBooks(applicationContext);
-                AATester.testAddressBooks(applicationContext);
-                OllieTester.testAddressBooks(applicationContext);
-                SugarTester.testAddressBooks(applicationContext);
+                AATester.testAddressBooks();
+                OllieTester.testAddressBooks();
+                SugarTester.testAddressBooks();
                 EventBus.getDefault().post(new TrialCompletedEvent(getResources().getString(R.string.complex)));
             }
         }).start();
+        System.gc();
     }
+
+    public void runSimpleTrialRead(View view) {
+        reset(R.string.simple);
+        runTestThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                runningTests = true;
+                Context applicationContext = MainActivity.this.getApplicationContext();
+                RealmTester.testAddressItemsRead();
+                OrmLiteTester.testAddressItemsRead(applicationContext);
+                GreenDaoTester.testAddressItemsRead(applicationContext);
+                DBFlowTester.testAddressItemsRead();
+                CupboardTester.testAddressItemsRead(applicationContext);
+                SqlTester.testAddressItemsRead(applicationContext);
+                SprinklesTester.testAddressItemsRead(applicationContext);
+                AATester.testAddressItemsRead();
+                OllieTester.testAddressItemsRead();
+                SugarTester.testAddressItemsRead();
+                EventBus.getDefault().post(new TrialCompletedEvent(getResources().getString(R.string.simple)));
+            }
+        });
+        runTestThread.start();
+        System.gc();
+    }
+
+    public void runComplexTrialRead(View view) {
+        reset(R.string.complex);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                runningTests = true;
+                Context applicationContext = MainActivity.this.getApplicationContext();
+                RealmTester.testAddressBooksRead();
+                OrmLiteTester.testAddressBooksRead(applicationContext);
+                GreenDaoTester.testAddressBooksRead(applicationContext);
+                DBFlowTester.testAddressBooksRead();
+                CupboardTester.testAddressBooksRead(applicationContext);
+                SqlTester.testAddressBooksRead(applicationContext);
+                SprinklesTester.testAddressBooksRead(applicationContext);
+                AATester.testAddressBooksRead();
+                OllieTester.testAddressBooksRead();
+                SugarTester.testAddressBooksRead();
+                EventBus.getDefault().post(new TrialCompletedEvent(getResources().getString(R.string.complex)));
+            }
+        }).start();
+        System.gc();
+    }
+
 }
