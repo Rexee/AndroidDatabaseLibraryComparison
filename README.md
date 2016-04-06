@@ -4,19 +4,39 @@ A test between a few of the popular libraries running a speed test on how fast t
 ## Benchmark Description
 
 There are two benchmarks.  The Simple trial uses a flat schema for an address book so each row is composed of name, address, city, state, and phone columns.  
+Simple model:
+```java
+public class SimpleAddressItem{
+  String name;
+  String address;
+  String city;
+  String state;
+  long phone;
+}
+```
+Complex model:
+```java
+public class AddressBook{
+    Long id;
+    String name;
+    String author;
+    Collection<AddressItem> addresses;
+    Collection<Contact> contacts;
+}
+public class AddressItem extends SimpleAddressItem {
+    private AddressBook addressBook;
+}
+public class Contact{
+    String name;
+    String email;
+    AddressBook addressBook;
+}
+```
 
-![Simple Address Item Schema](images/SimpleAddressItem.png "Simple Address Item Schema")
-
-The Complex trial is hierarchical and has support for multiple address books where each address book has contacts and addresses.
-
-![Address Book Schema](images/AddressBook.png "Address Book Schema")
 
 ## Results
 
 These are the results for the Simple trial:
 
-![Simple Trial](images/simpletrial.png "Simple Trial")
 
 And these are the results for the Complex trial:
-
-![Complex Trial](images/complextrial.png "Complex Trial")
