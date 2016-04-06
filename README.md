@@ -38,16 +38,16 @@ public class Contact{
 
 These are the results for the Simple trial:
 Write:
-![Simple model](images/simple_write.png "Simple model")
+![Simple model](images/simple_write.png "Simple model")  
 Read:
-![Simple model](images/simple_read.png "Simple model")
+![Simple model](images/simple_read.png "Simple model")  
 Without Sugar:
 ![Simple model](images/simple_read_no_sg.png "Simple model")
 
 And these are the results for the Complex trial:
 Write:
-![Complex model](images/complex_write.png "Complex model")
+![Complex model](images/complex_write.png "Complex model")  
 Read:
-![Complex model](images/complex_read.png "Complex model")
+![Complex model](images/complex_read.png "Complex model")  
 Without Sugar:
 ![Complex model](images/complex_read_no_sg.png "Complex model")
