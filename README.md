@@ -3,8 +3,8 @@ A test between a few of the popular libraries running a speed test on how fast t
 
 ## Benchmark Description
 
-There are two benchmarks.  The Simple trial uses a flat schema for an address book so each row is composed of name, address, city, state, and phone columns.  
-Simple model:
+There are two benchmarks:
+Simple model. Writes and reads 10000 times:
 ```java
 public class SimpleAddressItem{
   String name;
@@ -14,7 +14,7 @@ public class SimpleAddressItem{
   long phone;
 }
 ```
-Complex model:
+Complex model. Writes and reads 50x times with 50 items in each collection:
 ```java
 public class AddressBook{
     Long id;
