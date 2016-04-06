@@ -24,7 +24,7 @@ public class AddressBook{
     Collection<Contact> contacts;
 }
 public class AddressItem extends SimpleAddressItem {
-    private AddressBook addressBook;
+    AddressBook addressBook;
 }
 public class Contact{
     String name;
